@@ -6,3 +6,6 @@ Tässä yksinkertainen henkilötietorekisteri, jossa käytetään REST palvelua,
 
   - Henkilötiedot tallenetaan mySQL tietokantaa.
   - sekä ylimääräisenä työnä loin yksinkertaisen käyttöliittymän, jossa on lomake, jota kautta henkilötietoja voi muokata, uusia henkilöitä lisätä sekä poista joitakin henkilöitä. 
+
+
+
