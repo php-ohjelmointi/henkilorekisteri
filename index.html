@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <title>Henkilörekisteri</title>
+    <script>
+        async function haeHenkilot() {
+            const res = await fetch("api/read.php");
+            const data = await res.json();
+            const lista = document.getElementById("lista");
+            lista.innerHTML = "";
+            data.forEach(h => {
+                lista.innerHTML += `
+                    <tr>
+                        <td>${h.etunimi}</td>
+                        <td>${h.sukunimi}</td>
+                        <td>${h.sposti}</td>
+                        <td>
+                            <button onclick='muokkaa(${JSON.stringify(h)})'>Muokkaa</button>
+                            <button onclick='poista(${h.id})'>Poista</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        async function lisaaHenkilo() {
+            const data = {
+                etunimi: document.getElementById("etunimi").value,
+                sukunimi: document.getElementById("sukunimi").value,
+                sposti: document.getElementById("sposti").value
+            };
+            await fetch("api/create.php", {
+                method: "POST",
+                body: JSON.stringify(data)
+            });
+            haeHenkilot();
+        }
+
+        async function paivitaHenkilo() {
+            const data = {
+                id: document.getElementById("id").value,
+                etunimi: document.getElementById("etunimi").value,
+                sukunimi: document.getElementById("sukunimi").value,
+                sposti: document.getElementById("sposti").value
+            };
+            await fetch("api/update.php", {
+                method: "PUT",
+                body: JSON.stringify(data)
+            });
+            haeHenkilot();
+        }
+
+        async function poista(id) {
+            await fetch("api/delete.php", {
+                method: "DELETE",
+                body: JSON.stringify({ id })
+            });
+            haeHenkilot();
+        }
+
+        function muokkaa(h) {
+            document.getElementById("id").value = h.id;
+            document.getElementById("etunimi").value = h.etunimi;
+            document.getElementById("sukunimi").value = h.sukunimi;
+            document.getElementById("sposti").value = h.sposti;
+        }
+
+        window.onload = haeHenkilot;
+    </script>
+</head>
+<body>
+    <h1>Henkilörekisteri</h1>
+    <form onsubmit="event.preventDefault(); paivitaHenkilo();">
+        <input type="hidden" id="id">
+        <input type="text" id="etunimi" placeholder="Etunimi">
+        <input type="text" id="sukunimi" placeholder="Sukunimi">
+        <input type="email" id="sposti" placeholder="Sähköposti">
+        <button type="submit">Päivitä</button>
+        <button type="button" onclick="lisaaHenkilo()">Lisää uusi</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Etunimi</th>
+                <th>Sukunimi</th>
+                <th>Sähköposti</th>
+                <th>Toiminnot</th>
+            </tr>
+        </thead>
+        <tbody id="lista"></tbody>
+    </table>
+</body>
+</html>
