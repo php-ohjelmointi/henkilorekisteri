@@ -17,12 +17,18 @@
             data.forEach(h => {
                 lista.innerHTML += `
                     <tr>
+                        <td>${h.id}</td>
                         <td>${h.etunimi}</td>
                         <td>${h.sukunimi}</td>
                         <td>${h.sposti}</td>
+                        <td>${h.puhelin}</td>
+                        <td>${h.osoite}</td>
+                        <td>${h.postinumero}</td>
+                        <td>${h.kansallisuus}</td>
                         <td>
-                            <button onclick='muokkaa(${JSON.stringify(h)})'>Muokkaa</button>
-                            <button onclick='poista(${h.id})'>Poista</button>
+                            <button onclick='profiili(${h.id})' id='ProfiiliPainike'>Profiili</button>
+                            <button onclick='muokkaa(${JSON.stringify(h)})' id='MuokkaaPainike'>Muokkaa</button>
+                            <button onclick='poista(${h.id})' id='PoistaPainike'>Poista</button>
                         </td>
                     </tr>`;
             });
@@ -32,7 +38,11 @@
             const data = {
                 etunimi: document.getElementById("etunimi").value,
                 sukunimi: document.getElementById("sukunimi").value,
-                sposti: document.getElementById("sposti").value
+                sposti: document.getElementById("sposti").value,
+                puhelin: document.getElementById("puhelin").value,
+                osoite: document.getElementById("osoite").value,
+                postinumero: document.getElementById("postinumero").value,
+                kansallisuus: document.getElementById("kansallisuus").value
             };
             await fetch("api/create.php", {
                 method: "POST",
@@ -46,7 +56,11 @@
                 id: document.getElementById("id").value,
                 etunimi: document.getElementById("etunimi").value,
                 sukunimi: document.getElementById("sukunimi").value,
-                sposti: document.getElementById("sposti").value
+                sposti: document.getElementById("sposti").value,
+                puhelin: document.getElementById("puhelin").value,
+                osoite: document.getElementById("osoite").value,
+                postinumero: document.getElementById("postinumero").value,
+                kansallisuus: document.getElementById("kansallisuus").value
             };
             await fetch("api/update.php", {
                 method: "PUT",
@@ -68,11 +82,73 @@
             document.getElementById("etunimi").value = h.etunimi;
             document.getElementById("sukunimi").value = h.sukunimi;
             document.getElementById("sposti").value = h.sposti;
+            document.getElementById("puhelin").value = h.puhelin;
+            document.getElementById("osoite").value = h.osoite;
+            document.getElementById("postinumero").value = h.postinumero;
+            document.getElementById("kansallisuus").value = h.kansallisuus;
         }
 
         window.onload = haeHenkilot;
     </script>
 </head>
+<style>
+    #ProfiiliPainike{
+        background-color: lightskyblue;
+        width:25%;
+        outline: none;
+        border: none;
+    }
+     #MuokkaaPainike{
+        background-color: orange;
+        width:25%;
+        outline: none;
+        border: none;
+    }
+     #PoistaPainike{
+        background-color: red;
+        width:25%;
+        outline: none;
+        border: none;
+    }
+    #ProfiiliPainike:hover,#MuokkaaPainike:hover,#PoistaPainike:hover{
+        cursor: pointer;
+        font-weight: 400;
+        border-radius: 50%;
+    }
+    body{
+        width: 100%;
+        padding: 10px;
+    }
+    table{
+        margin-top: 2%;
+        width:100%;
+    }
+    table,th, td{
+        border:1px solid black;
+        border-collapse: collapse;
+    }
+    tr:nth-child(even) {
+        background-color: #D6EEEE;
+    }
+    th{
+        background-color: lightgray;
+    }
+    #paivita{
+        background-color: orange;
+        width:12.5em;
+        outline: none;
+        border: none;
+        offset: 1px;
+        cursor: pointer;
+    }
+    #LisaaUusi{
+        background-color: greenyellow;
+        width:12em;
+        outline: none;
+        border: none;
+    }
+    
+</style>
 <body>
     <h1>Henkilörekisteri</h1>
     <form onsubmit="event.preventDefault(); paivitaHenkilo();">
@@ -80,15 +156,24 @@
         <input type="text" id="etunimi" placeholder="Etunimi">
         <input type="text" id="sukunimi" placeholder="Sukunimi">
         <input type="email" id="sposti" placeholder="Sähköposti">
-        <button type="submit">Päivitä</button>
-        <button type="button" onclick="lisaaHenkilo()">Lisää uusi</button>
+        <input type="text" id="puhelin" placeholder="Puhelin">
+        <input type="text" id="osoite" placeholder="Osoite">
+        <input type="text" id="postinumero" placeholder="Postinumero">
+        <input type="text" id="kansallisuus" placeholder="Kansallisuus">
+        <button type="submit" id="paivita">Päivitä</button>
+        <button type="button" id="LisaaUusi" onclick="lisaaHenkilo()">Lisää uusi</button>
     </form>
     <table>
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Etunimi</th>
                 <th>Sukunimi</th>
                 <th>Sähköposti</th>
+                <th>Puhelin</th>
+                <th>Osoite</th>
+                <th>Postinumero</th>
+                <th>Kansallisuus</th>
                 <th>Toiminnot</th>
             </tr>
         </thead>

@@ -6,8 +6,12 @@
     $etunimi = $data['etunimi'];
     $sukunimi = $data['sukunimi'];
     $sposti = $data['sposti'];
+    $puhelin = $data['puhelin'];
+    $osoite = $data['osoite'];
+    $postinumero = $data['postinumero'];
+    $kansallisuus = $data['kansallisuus'];
 
-    $sql_Lause_Muokkaa = "UPDATE henkilot SET etunimi ='$etunimi', sukunimi='$sukunimi',sposti='$sposti' WHERE id='$id'";
+    $sql_Lause_Muokkaa = "UPDATE henkilot SET etunimi ='$etunimi', sukunimi='$sukunimi',sposti='$sposti',puhelin='$puhelin',osoite='$osoite',postinumero='$postinumero',kansallisuus='$kansallisuus' WHERE id='$id'";
         if(mysqli_query($conn, $sql_Lause_Muokkaa)){
             echo json_encode(["viesti" => "Henkilo Muokattu"]);
         }else {
