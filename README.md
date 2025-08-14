@@ -9,3 +9,12 @@ Tässä yksinkertainen henkilötietorekisteri, jossa käytetään REST palvelua,
 
 
 ![Image](https://github.com/user-attachments/assets/acb9691b-df62-4f51-b717-102d5e9f7ecd)
+
+### REST- Rajapinnan URL- linkit
+
+Metodi | URL | Toiminto
+-- | -- | --
+GET | http://localhost/api/read.php | Näytä kaikki henkilöt
+POST | http://localhost/api/create.php | Lisää uusi henkilö
+PUT | http://localhost/api/update.php | Muokkaa henkilö
+DELETE | http://localhost/api/delete.php | Poista henkilö
