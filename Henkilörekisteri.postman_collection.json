@@ -1,0 +1,143 @@
+{
+	"info": {
+		"_postman_id": "68fd3922-9f09-4b00-b7eb-72f1c0e06a14",
+		"name": "Henkilörekisteri",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31937467"
+	},
+	"item": [
+		{
+			"name": "Hae kaikki henkilöt",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/henkilorekisteri/api/read.php",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"henkilorekisteri",
+						"api",
+						"read.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Hae yksi henkilö",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/henkilorekisteri/api/profile.php?id=3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"henkilorekisteri",
+						"api",
+						"profile.php"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Lisää Uusi Henkilö",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"etunimi\": \"Matti\",\r\n  \"sukunimi\": \"Meikäläinen\",\r\n  \"sposti\": \"matti.meikalainen@example.com\",\r\n  \"puhelin\": \"0401234567\",\r\n  \"osoite\": \"Katu 1\",\r\n  \"postinumero\": \"00100\",\r\n  \"kansallisuus\": \"Suomi\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost/henkilorekisteri/api/create.php",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"henkilorekisteri",
+						"api",
+						"create.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 1,\r\n  \"etunimi\": \"Matti\",\r\n  \"sukunimi\": \"Meikäläinen\",\r\n  \"sposti\": \"matti.meikalainen@hotmail.com\",\r\n  \"puhelin\": \"040 1234 567\",\r\n  \"osoite\": \"Testikatu 1\",\r\n  \"postinumero\": \"00100\",\r\n  \"kansallisuus\": \"Suomi\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost/henkilorekisteri/api/update.php",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"henkilorekisteri",
+						"api",
+						"update.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 28\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost/henkilorekisteri/api/delete.php",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"henkilorekisteri",
+						"api",
+						"delete.php"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

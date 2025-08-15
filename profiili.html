@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Henkilön profiili</title>
+    <script>
+        async function haeProfiili() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) return;
+
+            const res = await fetch(`api/profile.php?id=${id}`);
+            const h = await res.json();
+            if (!h.id) {
+                document.getElementById("profiiliOtsikko").innerText = "Henkilöä ei löytynyt";
+                document.getElementById("profiili").innerText = "Henkilöä ei löytynyt.";
+                return;
+            }
+            document.getElementById("profiili").innerHTML = `
+                <h1>${h.etunimi} ${h.sukunimi}</h1>
+                <p><b>Sähköposti:</b> ${h.sposti}</p>
+                <p><b>Puhelin:</b> ${h.puhelin}</p>
+                <p><b>Osoite:</b> ${h.osoite}</p>
+                <p><b>Postinumero:</b> ${h.postinumero}</p>
+                <p><b>Kansallisuus:</b> ${h.kansallisuus}</p>
+            `;
+        }
+        window.onload = haeProfiili;
+    </script>
+</head>
+<body>
+    <h1 id="profiiliOtsikko">Henkilö profiili</h1>
+    <div id="profiili"></div>
+    <a href="index.html">Takaisin</a>
+</body>
+</html>
