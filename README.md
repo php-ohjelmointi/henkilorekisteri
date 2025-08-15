@@ -15,6 +15,7 @@ Tässä yksinkertainen henkilötietorekisteri, jossa käytetään REST palvelua,
 Metodi | URL | Toiminto
 -- | -- | --
 GET | http://localhost/api/read.php | Näytä kaikki henkilöt
+GET | http://localhost/api/profile.php | Näytä yksi henkilö
 POST | http://localhost/api/create.php | Lisää uusi henkilö
 PUT | http://localhost/api/update.php | Muokkaa henkilö
 DELETE | http://localhost/api/delete.php | Poista henkilö
