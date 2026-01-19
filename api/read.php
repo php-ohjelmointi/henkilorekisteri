@@ -1,7 +1,6 @@
 <?php 
     include 'db.php';
 
-
     $sql_Lause_Hae = "SELECT * FROM henkilot";
     $Tulos = mysqli_query($conn, $sql_Lause_Hae);
 

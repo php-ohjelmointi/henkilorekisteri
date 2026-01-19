@@ -54,7 +54,6 @@ INSERT INTO `henkilot` (`id`, `etunimi`, `sukunimi`, `sposti`, `puhelin`, `osoit
 (11, 'Livia', 'Corr', 'lcorr5@istockphoto.com', '352 330 2552', '62 Heffernan Place', '94269', 'FR'),
 (12, 'Chanda', 'Pibsworth', 'cpibsworth6@yolasite.com', '224 958 3601', '890 Washington Court', '52720', 'CN'),
 (13, 'Cully', 'Langsdon', 'clangsdon7@biblegateway.com', '382 245 2962', '03650 Lyons Point', ' 52980', 'CN'),
-(14, 'Janis', 'O\'Henery', 'johenery8@shareasale.com', '668 613 3156', '8024 Kings Drive', '903 33', 'SE'),
 (15, 'Felix', 'Blazewicz', 'fblazewicz9@biblegateway.com', '983 286 0214', '2 Spohn Drive', '11910', 'FI'),
 (16, 'Gabriellia', 'Guille', 'gguille0@photobucket.com', '270 937 4866', '18719 Clarendon Road', '07955', 'ID'),
 (17, 'Nerita', 'Neachell', 'nneachell1@hhs.gov', '776 321 9445', '9 Mifflin Point', '249028', 'RU'),

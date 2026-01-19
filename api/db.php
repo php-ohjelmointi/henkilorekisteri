@@ -1,17 +1,14 @@
 <?php
 
-    $host = 'localhost:3307';  
+    $host = 'localhost';  
     $user = 'root';  
-    $pass = ''; 
+    $pass = 'lrAZB]8DVEK3Bh0I'; 
     $db = "henkilorekisteri"; 
     
     $conn = mysqli_connect($host, $user, $pass,$db);  
-    if(!$conn )  
+    if(!$conn)  
     {  
     die('Could not connect: ' . mysqli_error());  
     }   
     
-
-
-
 ?>
