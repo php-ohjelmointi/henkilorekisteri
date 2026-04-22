@@ -10,6 +10,7 @@ if (!is_array($data)) {
     $data = $_POST;
 }
 
+$SSN = isset($data['SSN']) ? $data['SSN'] : '';
 $etunimi = isset($data['etunimi']) ? $data['etunimi'] : '';
 $sukunimi = isset($data['sukunimi']) ? $data['sukunimi'] : '';
 $sposti = isset($data['sposti']) ? $data['sposti'] : '';
@@ -43,11 +44,11 @@ if ($needsId) {
 }
 
 if ($needsId) {
-    $stmt = mysqli_prepare($conn, "INSERT INTO henkilot (id,etunimi,sukunimi,sposti,puhelin,osoite,postinumero,kansallisuus) VALUES (?,?,?,?,?,?,?,?)");
-    mysqli_stmt_bind_param($stmt, 'isssssss', $nextId, $etunimi, $sukunimi, $sposti, $puhelin, $osoite, $postinumero, $kansallisuus);
+    $stmt = mysqli_prepare($conn, "INSERT INTO henkilot (id,SSN,etunimi,sukunimi,sposti,puhelin,osoite,postinumero,kansallisuus) VALUES (?,?,?,?,?,?,?,?,?)");
+    mysqli_stmt_bind_param($stmt, 'issssssss', $nextId, $SSN, $etunimi, $sukunimi, $sposti, $puhelin, $osoite, $postinumero, $kansallisuus);
 } else {
-    $stmt = mysqli_prepare($conn, "INSERT INTO henkilot (etunimi,sukunimi,sposti,puhelin,osoite,postinumero,kansallisuus) VALUES (?,?,?,?,?,?,?)");
-    mysqli_stmt_bind_param($stmt, 'sssssss', $etunimi, $sukunimi, $sposti, $puhelin, $osoite, $postinumero, $kansallisuus);
+    $stmt = mysqli_prepare($conn, "INSERT INTO henkilot (SSN,etunimi,sukunimi,sposti,puhelin,osoite,postinumero,kansallisuus) VALUES (?,?,?,?,?,?,?,?)");
+    mysqli_stmt_bind_param($stmt, 'ssssssss', $SSN, $etunimi, $sukunimi, $sposti, $puhelin, $osoite, $postinumero, $kansallisuus);
 }
 
 if (!$stmt) {

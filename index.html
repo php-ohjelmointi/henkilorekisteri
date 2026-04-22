@@ -4,98 +4,328 @@
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Concert+One&display=swap" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+
+
 
     <title>Henkilörekisteri</title>
     <script>
+        // pagination is handled in `pagination.js` (change one value there: `window.PAGINATION.pageSize`)
+
         async function haeHenkilot() {
-            const res = await fetch("api/read.php");
+            const q = document.getElementById("search") ? document.getElementById("search").value.trim() : "";
+            const url = q ? `api/read.php?q=${encodeURIComponent(q)}` : "api/read.php";
+            const res = await fetch(url);
             const data = await res.json();
-            const lista = document.getElementById("lista");
-            lista.innerHTML = "";
-            data.forEach(h => {
-                lista.innerHTML += `
-                    <tr>
-                        <td>${h.id}</td>
-                        <td>${h.etunimi}</td>
-                        <td>${h.sukunimi}</td>
-                        <td>${h.sposti}</td>
-                        <td>${h.puhelin}</td>
-                        <td>${h.osoite}</td>
-                        <td>${h.postinumero}</td>
-                        <td>${h.kansallisuus}</td>
-                        <td>
-                            <button onclick='profiili(${h.id})' id='ProfiiliPainike'>Profiili</button>
-                            <button onclick='muokkaa(${JSON.stringify(h)})' id='MuokkaaPainike'>Muokkaa</button>
-                            <button onclick='poista(${h.id})' id='PoistaPainike'>Poista</button>
-                        </td>
-                    </tr>`;
-            });
+            // store full result set and delegate rendering to pagination.js
+            window._henkilot = Array.isArray(data) ? data : [];
+            window._currentPage = 1;
+            if (typeof renderPage === 'function') renderPage(1);
         }
 
         async function lisaaHenkilo() {
             const data = {
+                SSN: document.getElementById("SSN").value,
                 etunimi: document.getElementById("etunimi").value,
                 sukunimi: document.getElementById("sukunimi").value,
                 sposti: document.getElementById("sposti").value,
                 puhelin: document.getElementById("puhelin").value,
                 osoite: document.getElementById("osoite").value,
                 postinumero: document.getElementById("postinumero").value,
-                kansallisuus: document.getElementById("kansallisuus").value
+                kansallisuus: getKansallisuusValue()
             };
-            await fetch("api/create.php", {
-                method: "POST",
-                body: JSON.stringify(data)
-            });
-            haeHenkilot();
+            try {
+                const resp = await fetch("api/create.php", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const json = await resp.json();
+                if (resp.ok && !json.virhe) {
+                    const nimi = `${data.etunimi} ${data.sukunimi}`.trim();
+                    Swal.fire({ title: 'Lisätty', text: nimi ? `${nimi} lisätty` : (json.viesti || 'Uusi henkilö lisätty'), icon: 'success' });
+                    // if a custom nationality was used, add it into the select (before the '__other' option)
+                    const newK = (data.kansallisuus || '').toString().trim();
+                    if (newK) {
+                        const sel = document.getElementById('kansallisuus');
+                        const custom = document.getElementById('kansallisuus_custom');
+                        if (sel) {
+                            let exists = false;
+                            for (let i = 0; i < sel.options.length; i++) {
+                                if (sel.options[i].value === newK) { exists = true; break; }
+                            }
+                            if (!exists) {
+                                const opt = document.createElement('option');
+                                opt.value = newK;
+                                opt.textContent = newK;
+                                // insert before last option (which is '__other') if present
+                                const insertBeforeIndex = Math.max(sel.options.length - 1, 0);
+                                if (sel.options.length > 0) sel.insertBefore(opt, sel.options[insertBeforeIndex]); else sel.appendChild(opt);
+                            }
+                            sel.style.display = '';
+                            sel.value = newK;
+                        }
+                        if (custom) custom.style.display = 'none';
+                    }
+                    // clear form after successful create
+                    clearForm();
+                    haeHenkilot();
+                } else {
+                    Swal.fire({ title: 'Virhe', text: json.virhe || 'Lisäys epäonnistui', icon: 'error' });
+                }
+            } catch (err) {
+                Swal.fire({ title: 'Virhe', text: err.message || 'Verkkovirhe', icon: 'error' });
+            }
+        }
+
+        function _escapeHtml(s) {
+            if (s === null || s === undefined) return '';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getKansallisuusValue() {
+            const sel = document.getElementById('kansallisuus');
+            const custom = document.getElementById('kansallisuus_custom');
+            if (sel && sel.value && sel.value !== '__other') return sel.value;
+            if (custom && custom.value && custom.value.trim()) return custom.value.trim();
+            return '';
+        }
+
+        function onKansallisuusChange(sel) {
+            if (!sel) sel = document.getElementById('kansallisuus');
+            const custom = document.getElementById('kansallisuus_custom');
+            if (!custom) return;
+            if (sel.value === '__other') {
+                // hide select and show custom input
+                sel.style.display = 'none';
+                custom.style.display = 'inline-block';
+                custom.value = '';
+                custom.focus();
+            } else {
+                custom.style.display = 'none';
+            }
+        }
+
+        function restoreSelectIfNeeded() {
+            const sel = document.getElementById('kansallisuus');
+            const custom = document.getElementById('kansallisuus_custom');
+            if (!sel || !custom) return;
+            if (sel.style.display === 'none' && (!custom.value || custom.value.trim() === '')) {
+                sel.style.display = '';
+                custom.style.display = 'none';
+            }
         }
 
         async function paivitaHenkilo() {
             const data = {
                 id: document.getElementById("id").value,
+                SSN: document.getElementById("SSN").value,
                 etunimi: document.getElementById("etunimi").value,
                 sukunimi: document.getElementById("sukunimi").value,
                 sposti: document.getElementById("sposti").value,
                 puhelin: document.getElementById("puhelin").value,
                 osoite: document.getElementById("osoite").value,
                 postinumero: document.getElementById("postinumero").value,
-                kansallisuus: document.getElementById("kansallisuus").value
+                kansallisuus: getKansallisuusValue()
             };
-            await fetch("api/update.php", {
-                method: "PUT",
-                body: JSON.stringify(data)
+            const original = window._editingOriginal || {};
+            const changes = [];
+            ['SSN','etunimi','sukunimi','sposti','puhelin','osoite','postinumero','kansallisuus'].forEach(k => {
+                const orig = original[k] || '';
+                const now = (data[k] || '').toString();
+                if (orig.toString() !== now) changes.push({ field: k, from: orig, to: now });
             });
-            haeHenkilot();
+            try {
+                const resp = await fetch("api/update.php", {
+                    method: "PUT",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const json = await resp.json();
+                if (resp.ok && !json.virhe) {
+                    const nimi = `${data.etunimi} ${data.sukunimi}`.trim();
+                    if (changes.length === 0) {
+                        Swal.fire({ title: 'Ei muutoksia', text: nimi ? `${nimi} tiedoissa ei muutoksia` : 'Päivitys tehty', icon: 'info' });
+                    } else {
+                            const labels = { SSN: 'Henkilötunnus', etunimi: 'Etunimi', sukunimi: 'Sukunimi', sposti: 'Sähköposti', puhelin: 'Puhelin', osoite: 'Osoite', postinumero: 'Postinumero', kansallisuus: 'Kansallisuus' };
+                        const muutoksetHtml = changes.map(c => {
+                            if (c.field === 'SSN') {
+                                // show only cleaned SSN (remove non-alphanumeric)
+                                const cleaned = (_escapeHtml((c.to || '').toString())).replace(/[^A-Za-z0-9]/g, '');
+                                return `Henkilötunnus: ${cleaned}`;
+                            }
+                            return `<strong>${labels[c.field]||c.field}</strong>: ${_escapeHtml(c.from)} → ${_escapeHtml(c.to)}`;
+                        }).join('<br>');
+                        Swal.fire({ title: 'Muokattu', html: `<div>${_escapeHtml(nimi)} muokattu</div><div style="text-align:left;margin-top:8px">${muutoksetHtml}</div>`, icon: 'success', width: 600 });
+                    }
+                    // If nationality was custom and not in select, add it now
+                    const newK = (data.kansallisuus || '').toString().trim();
+                    if (newK) {
+                        const sel = document.getElementById('kansallisuus');
+                        const custom = document.getElementById('kansallisuus_custom');
+                        if (sel) {
+                            let exists = false;
+                            for (let i = 0; i < sel.options.length; i++) {
+                                if (sel.options[i].value === newK) { exists = true; break; }
+                            }
+                            if (!exists) {
+                                const opt = document.createElement('option');
+                                opt.value = newK;
+                                opt.textContent = newK;
+                                const insertBeforeIndex = Math.max(sel.options.length - 1, 0);
+                                if (sel.options.length > 0) sel.insertBefore(opt, sel.options[insertBeforeIndex]); else sel.appendChild(opt);
+                            }
+                            sel.style.display = '';
+                            sel.value = newK;
+                        }
+                        if (custom) custom.style.display = 'none';
+                    }
+                    // clear form after successful update
+                    clearForm();
+                    haeHenkilot();
+                } else {
+                    Swal.fire({ title: 'Virhe', text: json.virhe || 'Päivitys epäonnistui', icon: 'error' });
+                }
+            } catch (err) {
+                Swal.fire({ title: 'Virhe', text: err.message || 'Verkkovirhe', icon: 'error' });
+            }
         }
 
-        async function poista(id) {
-            await fetch("api/delete.php", {
-                method: "DELETE",
-                body: JSON.stringify({ id })
+        function clearForm() {
+            const ids = ['id','SSN','etunimi','sukunimi','sposti','puhelin','osoite','postinumero'];
+            ids.forEach(i => { const el = document.getElementById(i); if (el) el.value = ''; });
+            const sel = document.getElementById('kansallisuus');
+            const custom = document.getElementById('kansallisuus_custom');
+            if (sel) { sel.style.display = ''; sel.value = ''; }
+            if (custom) { custom.style.display = 'none'; custom.value = ''; }
+            window._editingOriginal = null;
+        }
+
+        async function poista(h) {
+            const nimi = `${h.etunimi || ''} ${h.sukunimi || ''}`.trim();
+            const result = await Swal.fire({
+                title: 'Vahvista poisto',
+                text: nimi ? `Poistetaanko ${nimi}?` : `Poistetaanko id ${h.id}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Poista',
+                cancelButtonText: 'Peruuta'
             });
-            haeHenkilot();
+            if (result.isConfirmed) {
+                try {
+                    const resp = await fetch("api/delete.php", {
+                        method: "DELETE",
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: h.id })
+                    });
+                    const json = await resp.json();
+                    if (resp.ok && !json.virhe) {
+                        Swal.fire({ title: 'Poistettu', text: nimi ? `${nimi} poistettu` : (json.viesti || 'Poistettu'), icon: 'success' });
+                        haeHenkilot();
+                    } else {
+                        Swal.fire({ title: 'Virhe', text: json.virhe || 'Poisto epäonnistui', icon: 'error' });
+                    }
+                } catch (err) {
+                    Swal.fire({ title: 'Virhe', text: err.message || 'Verkkovirhe', icon: 'error' });
+                }
+            }
         }
 
         function muokkaa(h) {
+            window._editingOriginal = h;
             document.getElementById("id").value = h.id;
+            document.getElementById("SSN").value = h.SSN;
             document.getElementById("etunimi").value = h.etunimi;
             document.getElementById("sukunimi").value = h.sukunimi;
             document.getElementById("sposti").value = h.sposti;
             document.getElementById("puhelin").value = h.puhelin;
             document.getElementById("osoite").value = h.osoite;
             document.getElementById("postinumero").value = h.postinumero;
-            document.getElementById("kansallisuus").value = h.kansallisuus;
+            // set nationality: if option exists use it, otherwise show custom input
+            const sel = document.getElementById('kansallisuus');
+            const custom = document.getElementById('kansallisuus_custom');
+            if (sel) {
+                let found = false;
+                for (let i = 0; i < sel.options.length; i++) {
+                    if (sel.options[i].value === (h.kansallisuus || '')) { found = true; break; }
+                }
+                if (found) {
+                    sel.value = h.kansallisuus || '';
+                    if (custom) custom.style.display = 'none';
+                    sel.style.display = '';
+                } else {
+                    // select 'Valitse muu kansallisuus' and show custom
+                    sel.value = '__other';
+                    sel.style.display = 'none';
+                    if (custom) { custom.style.display = 'inline-block'; custom.value = h.kansallisuus || ''; }
+                }
+            }
         }
 
         function profiili(id) {
             window.location.href = `profiili.html?id=${id}`;
         }
 
-        window.onload = haeHenkilot;
+        async function populateNationalities() {
+            try {
+                const res = await fetch('api/nationalities.php');
+                if (!res.ok) return;
+                const list = await res.json();
+                const sel = document.getElementById('kansallisuus');
+                if (!sel) return;
+                // remove all options
+                sel.options.length = 0;
+                // placeholder
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = 'Valitse kansallisuus';
+                sel.appendChild(placeholder);
+                // add fetched values
+                list.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    sel.appendChild(opt);
+                });
+                // add option for custom entry at the end
+                const other = document.createElement('option');
+                other.value = '__other';
+                other.textContent = 'Valitse muu kansallisuus';
+                sel.appendChild(other);
+            } catch (e) {
+                console.error('Failed to load nationalities', e);
+            }
+        }
+
+        window.onload = () => { populateNationalities(); haeHenkilot(); };
     </script>
+        <script src="pagination.js"></script>
 </head>
 <style>
+    h1{
+        font-family: "Concert One", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        text-align: center;
+        font-size: 4.5em;
+    }
     #ProfiiliPainike{
         background-color: lightskyblue;
         width:25%;
@@ -155,22 +385,34 @@
 </style>
 <body>
     <h1>Henkilörekisteri</h1>
+    
+    
+    
+    
     <form onsubmit="event.preventDefault(); paivitaHenkilo();">
         <input type="hidden" id="id">
+        <input type="text" id="SSN" placeholder="Henkilötunnus">
         <input type="text" id="etunimi" placeholder="Etunimi">
         <input type="text" id="sukunimi" placeholder="Sukunimi">
         <input type="email" id="sposti" placeholder="Sähköposti">
         <input type="text" id="puhelin" placeholder="Puhelin">
         <input type="text" id="osoite" placeholder="Osoite">
         <input type="text" id="postinumero" placeholder="Postinumero">
-        <input type="text" id="kansallisuus" placeholder="Kansallisuus">
+        <select id="kansallisuus" style="min-width:140px" onchange="onKansallisuusChange(this)">
+            <option value="">Valitse kansallisuus</option>
+        </select>
+        <input id="kansallisuus_custom" placeholder="Kirjoita muu kansallisuus" style="display:none;margin-left:8px;min-width:140px">
         <button type="submit" id="paivita">Päivitä</button>
         <button type="button" id="LisaaUusi" onclick="lisaaHenkilo()">Lisää uusi</button>
     </form>
+    <div style="margin-top:1em; margin-bottom:0.5em;">
+        <input type="search" id="search" placeholder="Hae etu- tai sukunimellä" oninput="haeHenkilot()" style="width:100%;padding:8px;box-sizing:border-box;">
+    </div>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
+                <th>Henkilötunnus</th>
                 <th>Etunimi</th>
                 <th>Sukunimi</th>
                 <th>Sähköposti</th>
